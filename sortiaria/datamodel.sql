@@ -25,15 +25,18 @@ DROP TABLE IF EXISTS `sortiaria`.`mot` ;
 
 CREATE TABLE IF NOT EXISTS `sortiaria`.`mot` (
   `mot_id` INT NOT NULL AUTO_INCREMENT,
-  `mot_terme` TINYTEXT NOT NULL,
+  `mot_terme` VARCHAR(45) NOT NULL,
+  `mot_phon` VARCHAR(45),
+  `mot_gram` VARCHAR(45) NOT NULL,
+  `mot_genre` VARCHAR(45),
   `mot_def` TEXT NOT NULL,
-  `mot_commentaire` TEXT NOT NULL,
-  PRIMARY KEY (`mot_terme`))
+  `mot_commentaire` TEXT,
+  PRIMARY KEY (`mot_id`))
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `sortiaria`.`utilisateur`
+-- Table `sortiaria`.`user`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `sortiaria`.`user` ;
 
@@ -47,14 +50,6 @@ CREATE TABLE IF NOT EXISTS `sortiaria`.`user` (
   UNIQUE INDEX `user_login_UNIQUE` (`user_login` ASC))
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
-<<<<<<< HEAD
--- Table `sortiaria`.`authorship`
-=======
--- Table `sortiaria`.`authorship`
->>>>>>> ce0cc4bbb2e10291b83c08b20f95d861a6c235c8
--- -----------------------------------------------------
 DROP TABLE IF EXISTS `sortiaria`.`authorship` ;
 
 CREATE TABLE IF NOT EXISTS `sortiaria`.`authorship` (
@@ -62,17 +57,21 @@ CREATE TABLE IF NOT EXISTS `sortiaria`.`authorship` (
   `authorship_user_id` INT NOT NULL,
   `authorship_mot_id` INT NOT NULL,
   `authorship_date` DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
-  `commentaire_id` INT NOT NULL AUTO_INCREMENT,
-
+  `commentaire_id` INT NOT NULL,
   PRIMARY KEY (`authorship_id`),
+
   INDEX `fk_authorship_1_idx` (`authorship_mot_id` ASC),
   CONSTRAINT `fk_authorship_1`
     FOREIGN KEY (`authorship_mot_id`)
-    FOREIGN KEY (`commentaire_id`)
     REFERENCES `sortiaria`.`mot` (`mot_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_authorship_2`
+    FOREIGN KEY (`commentaire_id`)
+    REFERENCES `sortiaria`.`commentaire` (`commentaire_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_authorship_3`
     FOREIGN KEY (`authorship_user_id`)
     REFERENCES `sortiaria`.`user` (`user_id`)
     ON DELETE NO ACTION
@@ -91,32 +90,26 @@ CREATE TABLE IF NOT EXISTS `sortiaria`.`commentaire` (
   `commentaire_source` TEXT NOT NULL,
   `commentaire_texte` TEXT NOT NULL,
   PRIMARY KEY (`commentaire_id`),
-  INDEX `fk_commentaire_1_idx` (`commentaire_mot_id` ASC),
+  INDEX `fk_commentaire_1_idx` (`commentaire_id` ASC),
   CONSTRAINT `fk_commentaire_1`
-    FOREIGN KEY (`commentaire_mot_id`)
+    FOREIGN KEY (`commentaire_id`)
     REFERENCES `sortiaria`.`mot` (`mot_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 SET SQL_MODE = '';
-<<<<<<< HEAD
-GRANT USAGE ON *.* TO sortiaria_user;
- DROP USER sortiaria_user;
 SET SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
-CREATE USER 'sortiaria_user' IDENTIFIED BY 'password';
-=======
-GRANT USAGE ON *.* TO sortiaria_utilisateur;
- DROP utilisateur sortiaria_utilisateur;
-SET SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
-CREATE utilisateur 'sortiaria_utilisateur' IDENTIFIED BY 'password';
->>>>>>> ce0cc4bbb2e10291b83c08b20f95d861a6c235c8
 
+DROP USER IF EXISTS 'sortiaria_user'@'localhost';
+CREATE USER 'sortiaria_user'@'localhost' IDENTIFIED BY 'password';
+
+GRANT USAGE ON *.* TO sortiaria_user;
 GRANT ALL ON `sortiaria`.* TO 'sortiaria_user';
 GRANT SELECT ON TABLE `sortiaria`.* TO 'sortiaria_user';
 GRANT SELECT, INSERT, TRIGGER ON TABLE `sortiaria`.* TO 'sortiaria_user';
 GRANT SELECT, INSERT, TRIGGER, UPDATE, DELETE ON TABLE `sortiaria`.* TO 'sortiaria_user';
-GRANT EXECUTE ON ROUTINE `sortiaria`.* TO 'sortiaria_user';
+GRANT CREATE ROUTINE ON `sortiaria`.* TO 'sortiaria_user';
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
@@ -127,7 +120,10 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `sortiaria`;
-INSERT INTO `sortiaria`.`mot` (`mot_id`, `mot_terme`, `mot_def`) VALUES (1, 'Alchimiste', 'Celui qui s’occupait d’alchimie.');
+INSERT INTO `sortiaria`.`mot` (`mot_id`, `mot_terme`, `mot_phon`, `mot_gram`, `mot_genre`, `mot_def`, `mot_commentaire`) VALUES (1, 'Alchimiste', '\/alʃimist\/', 'nom commun', 'masculin', 'Celui qui s’occupait d’alchimie.', 'Comme dans Fullmetal Alchemist.');
+INSERT INTO `sortiaria`.`mot` (`mot_id`, `mot_terme`, `mot_phon`, `mot_gram`, `mot_genre`, `mot_def`, `mot_commentaire`) VALUES (2, 'Familier', '\/familje\/', 'nom commun', 'masculin', 'Créature supposée entretenir un rapport mystique avec un·e magicien·ne ou sorcier·e.', 'Genre un chat.');
+INSERT INTO `sortiaria`.`mot` (`mot_id`, `mot_terme`, `mot_phon`, `mot_gram`, `mot_genre`, `mot_def`, `mot_commentaire`) VALUES (3, 'Balais', '', 'nom commun', 'masculin', 'Mode de locomotion, héritage des balais de druide en genêt, bois auquel on prête des vertus magiques.', '');
+INSERT INTO `sortiaria`.`mot` (`mot_id`, `mot_terme`, `mot_phon`, `mot_gram`, `mot_genre`, `mot_def`, `mot_commentaire`) VALUES (4, 'Walpurgis, nuit de', '\/walpyʁʒi\/', 'nom propre', '', 'Fête néo-païenne qui a lieu dans la nuit du 30 avril au 1er mai. Célébrée clandestinement dans toute l\'Europe depuis des temps reculés, malgré les interdits et les excommunications de l\'Église, elle a été identifiée au sabbat des sorcières.', '');
 
 COMMIT;
 

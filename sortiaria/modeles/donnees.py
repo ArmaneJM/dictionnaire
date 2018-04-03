@@ -7,11 +7,13 @@ from .. app import db
 class Authorship(db.Model):
     __tablename__ = "authorship"
     authorship_id = db.Column(db.Integer, nullable=True, autoincrement=True, primary_key=True)
-    authorship_place_id = db.Column(db.Integer, db.ForeignKey('place.place_id'))
+    authorship_mot_id = db.Column(db.Integer, db.ForeignKey('mot.mot_id'))
     authorship_user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    authorship_commentaire_id = db.Column(db.Integer, db.ForeignKey('commentaire.commentaire_id'))
     authorship_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     user = db.relationship("User", back_populates="authorships")
-    place = db.relationship("Mot", back_populates="authorships")
+    mot = db.relationship("Mot", back_populates="authorships")
+    commentaire = db.relationship("Commentaire", back_populates="authorships")
 
     def author_to_json(self):
         return {
@@ -25,9 +27,13 @@ class Mot(db.Model):
     __tablename__ = "mot"
     mot_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True, autoincrement=True)
     mot_terme = db.Column(db.Text)
+    mot_phon = db.Column(db.Text)
+    mot_gram = db.Column(db.Text)
+    mot_genre = db.Column(db.Text)
     mot_def = db.Column(db.Text)
     mot_commentaire = db.Column(db.Text)
-    authorships = db.relationship("authorship", back_populates="mot")
+    authorships = db.relationship("Authorship", back_populates="mot")
+    commentaire = db.relationship("Commentaire", back_populates="mot")
 
     def to_jsonapi_dict(self):
         """ It ressembles a little JSON API format but it is not completely compatible
@@ -38,9 +44,11 @@ class Mot(db.Model):
             "id": self.mot_id,
             "attributes": {
                 "terme": self.mot_terme,
+		"phon": self.mot_phon,
+		"gram": self.mot_gram,
+		"genre": self.mot_genre,
                 "definition": self.mot_def,
                 "commentaire": self.commentaire,
-                "category": self.place_type
             },
             "links": {
                 "self": url_for("mot", mot_id=self.mot_id, _external=True),
@@ -126,8 +134,9 @@ class Commentaire(db.Model):
     commentaire_titre = db.Column(db.Text)
     commentaire_source = db.Column(db.Text)
     commentaire_texte = db.Column(db.Text)
-    authorships = db.relationship("authorship", back_populates="commentaire")
-    mot = db.relationship("mot", back_populates="commentaire")
+    commentaire_mot_id = db.Column(db.Integer, db.ForeignKey('mot.mot_id'))
+    authorships = db.relationship("Authorship", back_populates="commentaire")
+    mot = db.relationship("Mot", back_populates="commentaire")
 
     def to_jsonapi_dict(self):
         """ It ressembles a little JSON API format but it is not completely compatible

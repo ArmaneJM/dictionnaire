@@ -13,7 +13,7 @@ def accueil():
     """ Route permettant l'affichage d'une page accueil
     """
     # On a bien sûr aussi modifié le template pour refléter le changement
-    lieux = Place.query.order_by(Place.place_id.desc()).limit(5).all()
+    mots = Mot.query.all()
     return render_template("pages/accueil.html", nom="Sortiaria", mots=mots)
 
 
@@ -25,6 +25,14 @@ def mot(mot_id):
     # On a bien sûr aussi modifié le template pour refléter le changement
     unique_mot = Mot.query.get(mot_id)
     return render_template("pages/mot.html", nom="Sortiaria", mot=unique_mot)
+
+@app.route("/mot/<int:mot_id>/tei")
+def export_tei(mot_id):
+    """ Route permettant l'affichage des données d'un mot en TEI
+    :param mot_id: Identifiant numérique du mot
+    """
+    unique_mot = Mot.query.get(mot_id)
+    return render_template("pages/export_tei.html", nom="Sortiaria", mot=unique_mot)
 
 
 @app.route("/recherche")
@@ -73,7 +81,7 @@ def browse():
     else:
         page = 1
 
-    resultats = Place.query.paginate(page=page, per_page=MOTS_PAR_PAGE)
+    resultats = Mot.query.paginate(page=page, per_page=MOTS_PAR_PAGE)
 
     return render_template(
         "pages/browse.html",
@@ -87,10 +95,10 @@ def inscription():
     # Si on est en POST, cela veut dire que le formulaire a été envoyé
     if request.method == "POST":
         statut, donnees = User.creer(
-            login=request.form.post("login", None),
-            email=request.form.post("email", None),
-            nom=request.form.post("nom", None),
-            motdepasse=request.form.post("motdepasse", None)
+            login=request.form.get("login", None),
+            email=request.form.get("email", None),
+            nom=request.form.get("nom", None),
+            motdepasse=request.form.get("motdepasse", None)
         )
         if statut is True:
             flash("Enregistrement effectué. Identifiez-vous maintenant", "success")
@@ -112,8 +120,8 @@ def connexion():
     # Si on est en POST, cela veut dire que le formulaire a été envoyé
     if request.method == "POST":
         utilisateur = User.identification(
-            login=request.form.post("login", None),
-            motdepasse=request.form.post("motdepasse", None)
+            login=request.form.get("login", None),
+            motdepasse=request.form.get("motdepasse", None)
         )
         if utilisateur:
             flash("Connexion effectuée", "success")
